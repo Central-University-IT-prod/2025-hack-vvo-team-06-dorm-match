@@ -1,0 +1,70 @@
+services:
+  auth:
+    build:
+      context: ./backend
+      dockerfile: services/auth/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=RETRACTED
+      - REDIS_URL=RETRACTED
+      - JWT_SECRET=RETRACTED
+      - PORT_AUTH=8080
+      - PORT_ROOM_MANAGEMENT=8081
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./backend/migrations:/app/migrations
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - auth
+  #     - room-management
+  #     - postgres
+  #     - redis
+
+  room-management:
+    build:
+      context: ./backend
+      dockerfile: services/room-management/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=RETRACTED
+      - REDIS_URL=RETRACTED
+      - JWT_SECRET=RETRACTED
+      - PORT_AUTH=8080
+      - PORT_ROOM_MANAGEMENT=8081
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./backend/migrations:/app/migrations
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=RETRACTED
+      - POSTGRES_PASSWORD=RETRACTED
+      - POSTGRES_DB=RETRACTED
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6380:6379"
+
+volumes:
+  postgres_data:
+  redis_data:
